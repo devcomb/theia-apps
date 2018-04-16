@@ -1,10 +1,10 @@
-#!/bin/sh
+#!/bin/bash
+set -x
 export HOME=/home/theia
-export USER_NAME=$(whoami)
-export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-if ! whoami &> /dev/null; then
-  if [ -w /etc/passwd ]; then
-    echo "${USER_NAME:-default}:x:$(id -u):0:${USER_NAME:-default} user:${HOME}:/sbin/nologin" >> /etc/passwd
-  fi
+export USER_ID=$(id -u)
+export GROUP_ID=$(id -g)
+
+if [ -w /etc/passwd ]; then
+  echo "${USER_ID}:x:$(id -u):0:${USER_ID} user:${HOME}:/sbin/nologin" >> /etc/passwd
 fi
 exec "$@"
