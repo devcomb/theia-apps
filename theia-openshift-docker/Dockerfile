@@ -6,4 +6,4 @@ RUN chgrp -R 0 /home/theia && \
     chmod g=u /etc/passwd
 USER 10001
 ENTRYPOINT ["/home/theia/entrypoint"]
-CMD yarn theia start /home/project --hostname 0.0.0.0
+CMD /usr/local/bin/yarn theia start /home/project --hostname 0.0.0.0
