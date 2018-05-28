@@ -11,14 +11,21 @@ DEFAULT_STATUS_POLL=60
 STATUS_POLL=${STATUS_POLL:-${DEFAULT_STATUS_POLL}}
 DEFAULT_THEIA_APP=/home/theia/theia_process.sh
 THEIA_APP=${THEIA_APP:-${DEFAULT_THEIA_APP}}
+DEFAULT_APP_ASSEMBLE=/usr/libexec/s2i/assemble
+APP_ASSEMBLE=${APP_ASSEMBLE:-${DEFAULT_APP_ASSEMBLE}}
 DEFAULT_APP_PROC=/usr/libexec/s2i/run
 APP_PROC=${APP_PROC:-${DEFAULT_APP_PROC}}
-DEFAULT_DEV_MODE=false
+DEFAULT_DEV_MODE=true
 DEV_MODE=${DEV_MODE:-${DEFAULT_DEV_MODE}}
 DEFAULT_SEC_COMMAND="exec npm run -d $NPM_RUN"
 SEC_COMMAND=${SEC_COMMAND:-${DEFAULT_SEC_COMMAND}}
 DEFAULT_SEC_DEBUG_COMMAND="exec nodemon --inspect=$DEBUG_PORT"
 SEC_DEBUG_COMMAND=${SEC_DEBUG_COMMAND:-${DEFAULT_SEC_DEBUG_COMMAND}}
+DEFAULT_GIT_REPO_URL=""
+GIT_REPO_URL=${GIT_REPO_URL:-${DEFAULT_GIT_REPO_URL}}
+DEFAULT_ASSEMBLE=false
+ASSEMBLE=${ASSEMBLE:-${DEFAULT_ASSEMBLE}}
+
 
 #This will need to be set to true when used as builder image
 DEFAULT_SEC_PROC=false
@@ -43,9 +50,9 @@ echo -e "Environment: \n\tDEV_MODE=${DEV_MODE}"\
 "\n\tSEC_COMMAND=${SEC_COMMAND}"\
 "\n\tSEC_DEBUG_COMMAND=${SEC_DEBUG_COMMAND}"
 
-if [ $DEV_MODE ]; then
+if [ "$DEV_MODE" == true ]; then
   # Start the theia process
-  echo "DEV_MODE=true - Starting ${THEIA_APP} ."
+  echo "DEV_MODE=$DEV_MODE - Starting ${THEIA_APP} ."
   ${THEIA_APP} &
   status=$?
   if [ $status -ne 0 ]; then
@@ -56,7 +63,15 @@ if [ $DEV_MODE ]; then
 fi
 
 # Start the secondary process
-if [ ${SEC_PROC} ]; then
+if [ "$SEC_PROC" == true ]; then
+  if [ ! "$GIT_REPO_URL" == "" ]; then
+    echo "Fetching source code from $GIT_REPO_URL."
+    git clone $GIT_REPO_URL /tmp/src
+  fi
+  if [ "$ASSEMBLE" == true ]; then
+    echo "Running assemble code."
+    $APP_ASSEMBLE
+  fi
   echo "Starting node process."
   if [ "$DEV_MODE" == true ]; then
     echo "Launching via nodemon..."
@@ -72,15 +87,15 @@ fi
 # if it detects that either of the processes has exited.
 # Otherwise it loops forever, waking up every ${DEFAULT_STATUS_POLL} seconds
 
-if [ ${DEV_MODE} -o [ -f ${APP_PROC} ] ]; then
+if [ "$DEV_MODE" == true ] || [ "$SEC_PROC" == true ] ; then
   while sleep ${DEFAULT_STATUS_POLL}; do
-    if [ ${DEV_MODE} ]; then
+    if [ "$DEV_MODE" == true ]; then
       ps aux |grep ${THEIA_APP} |grep -q -v grep
       PROCESS_1_STATUS=$?
       else
         PROCESS_1_STATUS=0
     fi
-    if [ -f ${APP_PROC} ]; then
+    if [ "$SEC_PROC" == true ]; then
       ps aux |grep ${APP_PROC} |grep -q -v grep
       PROCESS_2_STATUS=$?
       else
