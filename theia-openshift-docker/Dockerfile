@@ -22,7 +22,11 @@ RUN rm -rf /opt/app-root/src && \
     chown -R 1001:0 /home/theia /opt/app-root $STI_SCRIPTS_PATH/run && \
     chmod -R ug+rwx /home/theia /opt/app-root && \
     chmod -R ug+x $STI_SCRIPTS_PATH/run && \
-    echo 'if [ ! $DEV_MODE ]; then rm -rf /home/theia/* ; fi' >> $STI_SCRIPTS_PATH/assemble
+    echo 'if [ ! $DEV_MODE ]; then rm -rf /home/theia/* ; fi' >> $STI_SCRIPTS_PATH/assemble && \
+    yum install -y http://opensource.wandisco.com/centos/7/git/x86_64/wandisco-git-release-7-2.noarch.rpm && \
+    yum install -y git && \
+    ln -s /usr/lib64/libcurl.so.4 /usr/lib64/libcurl-gnutls.so.4
+
 USER 1001
 ARG version=latest
 RUN cd /home/theia && \
