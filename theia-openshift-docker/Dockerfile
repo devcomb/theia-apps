@@ -12,22 +12,13 @@ SHELL ["/bin/bash", "-c"]
 USER root
 RUN curl --silent --location https://dl.yarnpkg.com/rpm/yarn.repo | tee /etc/yum.repos.d/yarn.repo && \
     curl --silent --location https://rpm.nodesource.com/setup_8.x | bash - && \
-    rpm -Uvh --nodeps $(repoquery --location yarn)
-RUN mkdir /home/theia
-COPY --from=0 /home/theia/package.json /home/theia/package.json
-COPY wrapper_process.sh $STI_SCRIPTS_PATH/run
-COPY theia_process.sh /home/theia/theia_process.sh
-RUN rm -rf /opt/app-root/src && \
-    mkdir /opt/app-root/src && \
-    chown -R 1001:0 /home/theia /opt/app-root $STI_SCRIPTS_PATH/run && \
-    chmod -R ug+rwx /home/theia /opt/app-root && \
-    chmod -R ug+x $STI_SCRIPTS_PATH/run && \
-    echo 'if [ ! $DEV_MODE ]; then rm -rf /home/theia/* ; fi' >> $STI_SCRIPTS_PATH/assemble && \
+    rpm -Uvh --nodeps $(repoquery --location yarn) && \
     yum install -y http://opensource.wandisco.com/centos/7/git/x86_64/wandisco-git-release-7-2.noarch.rpm && \
     yum install -y git && \
     ln -s /usr/lib64/libcurl.so.4 /usr/lib64/libcurl-gnutls.so.4
 
-USER 1001
+RUN mkdir /home/theia
+COPY --from=0 /home/theia/package.json /home/theia/package.json
 ARG version=latest
 RUN cd /home/theia && \
     yarn && \
@@ -36,6 +27,17 @@ RUN cd /home/theia && \
     yarn cache clean
 RUN chown -R 1001:0 /home/theia /opt/app-root && \
     chmod -R g=u /home/theia /opt/app-root
+
+COPY wrapper_process.sh $STI_SCRIPTS_PATH/run
+COPY theia_process.sh /home/theia/theia_process.sh
+RUN rm -rf /opt/app-root/src && \
+    mkdir /opt/app-root/src && \
+    chown -R 1001:0 /home/theia /opt/app-root $STI_SCRIPTS_PATH/run && \
+    chmod -R ug+rwx /home/theia /opt/app-root && \
+    chmod -R ug+x $STI_SCRIPTS_PATH/run && \
+    echo 'if [ ! $DEV_MODE ]; then rm -rf /home/theia/* ; fi' >> $STI_SCRIPTS_PATH/assemble
+
+USER 1001
 EXPOSE 3000
 ENV SHELL /bin/bash
 ENV USE_LOCAL_GIT true
