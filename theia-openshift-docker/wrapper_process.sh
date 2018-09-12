@@ -23,6 +23,8 @@ DEFAULT_SEC_DEBUG_COMMAND="exec nodemon --inspect=$DEBUG_PORT"
 SEC_DEBUG_COMMAND=${SEC_DEBUG_COMMAND:-${DEFAULT_SEC_DEBUG_COMMAND}}
 DEFAULT_GIT_REPO_URL=""
 GIT_REPO_URL=${GIT_REPO_URL:-${DEFAULT_GIT_REPO_URL}}
+DEFAULT_GIT_REPO_REF=""
+GIT_REPO_REF=${GIT_REPO_REF:-${DEFAULT_GIT_REPO_REF}}
 DEFAULT_ASSEMBLE=false
 ASSEMBLE=${ASSEMBLE:-${DEFAULT_ASSEMBLE}}
 
@@ -67,6 +69,10 @@ if [ "$SEC_PROC" == true ]; then
   if [ ! "$GIT_REPO_URL" == "" ]; then
     echo "Fetching source code from $GIT_REPO_URL."
     git clone $GIT_REPO_URL /tmp/src
+    if [ ! "$GIT_REPO_REF" == "" ]; then
+      echo "Checkout branch $GIT_REPO_REF."
+      git checkout $GIT_REPO_REF
+    fi
   fi
   if [ "$ASSEMBLE" == true ]; then
     echo "Running assemble code."
