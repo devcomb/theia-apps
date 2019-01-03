@@ -52,6 +52,11 @@ echo -e "Environment: \n\tDEV_MODE=${DEV_MODE}"\
 "\n\tSEC_COMMAND=${SEC_COMMAND}"\
 "\n\tSEC_DEBUG_COMMAND=${SEC_DEBUG_COMMAND}"
 
+if [ "$SYNC_BUILD" == true ] || [ ! "$(ls -A /opt/app-root/src)" ] ; then
+  echo "\n\nRunning rsync -a /opt/app-root/src-build /opt/app-root/src"
+  rsync -a /opt/app-root/src-build /opt/app-root/src
+fi
+
 if [ "$DEV_MODE" == true ]; then
   # Start the theia process
   echo "DEV_MODE=$DEV_MODE - Starting ${THEIA_APP} ."
