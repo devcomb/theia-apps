@@ -35,7 +35,7 @@ RUN rm -rf /opt/app-root/src && \
     chown -R 1001:0 /home/theia /opt/app-root $STI_SCRIPTS_PATH/run && \
     chmod -R ug+rwx /home/theia /opt/app-root && \
     chmod -R ug+x $STI_SCRIPTS_PATH/run && \
-    echo 'if [ ! $DEV_MODE ]; then rm -rf /home/theia/* ; fi' >> $STI_SCRIPTS_PATH/assemble
+    echo 'if [ ! $DEV_MODE ]; then rm -rf /home/theia/* ; fi' >> $STI_SCRIPTS_PATH/assemble && \
     echo 'if [ $DEV_MODE ]; then mv /opt/app-root/src /opt/app-root/src-build ; fi' >> $STI_SCRIPTS_PATH/assemble
 
 USER 1001
